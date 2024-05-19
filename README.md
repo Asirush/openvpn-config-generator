@@ -23,3 +23,9 @@ Follow these instructions to get the application up and running on your local ma
 ```sh
 git clone https://github.com/your-username/openvpn-config-generator.git
 cd openvpn-config-generator
+docker-compose up --build
+```
+
+### Access the Application
+
+Open a web browser and navigate to `http://localhost:5000`. You should see the home page of the application.
