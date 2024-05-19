@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenVPN Config Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>OpenVPN Configuration Generator</h1>
+        <form action="/generate" method="post">
+            <div class="row">
+                <div class="col-sm-12">
+                    <label for="server_ip">Server IP:</label>
+                    <input type="text" id="server_ip" name="server_ip" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="port">Port:</label>
+                    <input type="text" id="port" name="port" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="proto">Protocol (tcp/udp):</label>
+                    <input type="text" id="proto" name="proto" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="dev">Dev (tun/tap):</label>
+                    <input type="text" id="dev" name="dev" required>
+                </div>
+                <div class="col-sm-12">
+                    <button type="submit">Generate Server Configurations</button>
+                </div>
+            </div>
+        </form>
+        <hr>
+        <form action="/generate_client" method="post">
+            <div class="row">
+                <div class="col-sm-12">
+                    <label for="client_name">Client Name:</label>
+                    <input type="text" id="client_name" name="client_name" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="server_ip">Server IP:</label>
+                    <input type="text" id="server_ip" name="server_ip" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="port">Port:</label>
+                    <input type="text" id="port" name="port" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="proto">Protocol (tcp/udp):</label>
+                    <input type="text" id="proto" name="proto" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="dev">Dev (tun/tap):</label>
+                    <input type="text" id="dev" name="dev" required>
+                </div>
+                <div class="col-sm-12">
+                    <button type="submit">Generate Client Configurations</button>
+                </div>
+            </div>
+        </form>
+        <hr>
+        <form action="/generate_client_from_server" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-sm-12">
+                    <label for="server_conf_file">Upload Server Configuration:</label>
+                    <input type="file" id="server_conf_file" name="server_conf_file" required>
+                </div>
+                <div class="col-sm-12">
+                    <label for="client_name">Client Name:</label>
+                    <input type="text" id="client_name" name="client_name" required>
+                </div>
+                <div class="col-sm-12">
+                    <button type="submit">Generate Client Configuration from Server Configuration</button>
+                </div>
+            </div>
+        </form>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
