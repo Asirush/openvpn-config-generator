@@ -29,3 +29,7 @@ docker-compose up --build
 ### Access the Application
 
 Open a web browser and navigate to `http://localhost:5000`. You should see the home page of the application.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
