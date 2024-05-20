@@ -33,3 +33,32 @@ Open a web browser and navigate to `http://localhost:5000`. You should see the h
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## TODO list:
+- [ ] Restructure files and dockerfile (start file main.py)
+- [ ] Update README.md (add multibuild instructions + other info)
+like this:
+```bash
+# Create a new builder instance
+docker buildx create --name=container --driver=docker-container --use --bootstrap
+
+# Build the image (multibuild for amd64 and arm64)
+docker buildx build \
+  --builder=container \
+  --platform=linux/amd64,linux/arm64 \
+  -t asirush/openvpn_config_generator:latest \
+  --push .
+```
+
+- [ ] Add Helm charts for k*s deployment
+- [ ] Add CI/CD pipeline for github actions (autobuild and push to dockerhub)
+- [ ] Add config file (use os.getenv instead of hardcoded values)
+like this:
+```python
+# config.py file
+
+import os
+
+# Get the value of the environment variable
+value = os.getenv('FLASK_SECRET_KEY', 'default_value')
+```
