@@ -12,11 +12,16 @@ RUN apt-get update && \
     apt-get install -y openvpn easy-rsa tar && \
     pip install --no-cache-dir -r requirements.txt
 
-# Make port 5000 available to the world outside this container
-EXPOSE 5000
+# Create a non-root user with specified UID and GID
+RUN addgroup --gid 1001 user && \
+    adduser --uid 1001 --gid 1001 --disabled-password --gecos "" user
 
-# Define environment variable
-ENV FLASK_APP=app.py
+# Switch to the non-root user
+USER user
 
 # Run app.py when the container launches
 CMD ["flask", "run", "--host=0.0.0.0"]
+
+##
+# Command to run the application when the container starts
+##CMD ["python", "main.py"]

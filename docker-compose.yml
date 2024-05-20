@@ -1,9 +1,43 @@
+---
 version: '3.8'
 
 services:
+  # Service for the OpenVPN configuration generator
   openvpn-config-generator:
-    build: .
+    # Build configuration for the Docker image
+    build:
+      # Use the current directory as the build context
+      context: ./
+    # Name of the container
+    container_name: openvpn_config_generator
+
+    # Image to use (dockerhub?)
+    #image: asirush/openvpn_config_generator:latest
+
+    # Restart the container automatically
+    restart: always
+    # Security context for the container (uses in dockerfile)
+    user: 1001:1001
+    # Expose the container's port 5000 (host:container)
     ports:
       - "5000:5000"
+
+    # Resources for the container
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+
+    # Environment variables for the container
     environment:
       - FLASK_ENV=development
+      #- FLASK_SECRET_KEY=CHANGE_SECRET_KEY
+    # Create a network for the container
+    networks:
+      - application
+
+# Define networks
+networks:
+  backend:
+    driver: application
