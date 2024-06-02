@@ -3,9 +3,13 @@ import subprocess
 import tempfile
 import tarfile
 from flask import Flask, request, render_template, send_file, flash, redirect, url_for
+from flask_restful import Api, Resource, reqparse
+from flasgger import Swagger, swag_from
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+api = Api(app)
+swagger = Swagger(app)
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 def run_command(command, env=None, cwd=None):
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, cwd=cwd)
@@ -188,6 +192,107 @@ def generate_client_from_server():
     except Exception as e:
         flash(str(e))
         return redirect(url_for('index'))
+
+class GenerateServerConfigAPI(Resource):
+    @swag_from({
+        'parameters': [
+            {
+                'name': 'server_ip',
+                'in': 'formData',
+                'type': 'string',
+                'required': True
+            },
+            {
+                'name': 'port',
+                'in': 'formData',
+                'type': 'string',
+                'required': True
+            },
+            {
+                'name': 'proto',
+                'in': 'formData',
+                'type': 'string',
+                'required': True
+            },
+            {
+                'name': 'dev',
+                'in': 'formData',
+                'type': 'string',
+                'required': True
+            }
+        ],
+        'responses': {
+            '200': {
+                'description': 'Server configuration generated successfully',
+                'schema': {
+                    'type': 'string'
+                }
+            }
+        }
+    })
+    def post(self):
+        try:
+            with tempfile.TemporaryDirectory() as tempdir:
+                easy_rsa_dir = os.path.join(tempdir, 'easy-rsa')
+                setup_easy_rsa(easy_rsa_dir)
+                server_ip = request.form['server_ip']
+                port = request.form['port']
+                proto = request.form['proto']
+                dev = request.form['dev']
+                server_conf_path = generate_server_config(easy_rsa_dir, server_ip, port, proto, dev)
+                tar_output_path = os.path.join(tempdir, 'configurations.tar.gz')
+                create_tar_archive([server_conf_path], tar_output_path)
+                return send_file(tar_output_path, as_attachment=True)
+        except Exception as e:
+            return {'message': str(e)}, 500
+
+class GenerateClientConfigAPI(Resource):
+    @swag_from({
+        'parameters': [
+            {
+                'name': 'server_conf_file',
+                'in': 'formData',
+                'type': 'file',
+                'required': True
+            },
+            {
+                'name': 'client_name',
+                'in': 'formData',
+                'type': 'string',
+                'required': True
+            }
+        ],
+        'responses': {
+            '200': {
+                'description': 'Client configuration generated successfully',
+                'schema': {
+                    'type': 'string'
+                }
+            }
+        }
+    })
+    def post(self):
+        try:
+            server_conf_file = request.files['server_conf_file']
+            client_name = request.form['client_name']
+
+            with tempfile.TemporaryDirectory() as tempdir:
+                server_conf_path = os.path.join(tempdir, 'server.conf')
+                server_conf_file.save(server_conf_path)
+                client_conf = generate_client_config_from_server(server_conf_path, client_name)
+
+                client_conf_path = os.path.join(tempdir, f'{client_name}.ovpn')
+                with open(client_conf_path, 'w') as f:
+                    f.write(client_conf)
+
+                tar_output_path = os.path.join(tempdir, f'{client_name}_configurations.tar.gz')
+                create_tar_archive([client_conf_path], tar_output_path)
+                return send_file(tar_output_path, as_attachment=True)
+        except Exception as e:
+            return {'message': str(e)}, 500
+
+api.add_resource(GenerateServerConfigAPI, '/api/generate_server_config')
+api.add_resource(GenerateClientConfigAPI, '/api/generate_client_config')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
